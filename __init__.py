@@ -1,6 +1,8 @@
-from pynicotine.pluginsystem import BasePlugin
 from pathlib import Path
-from stats import UploadedItems
+
+from pynicotine.pluginsystem import BasePlugin
+
+from stats import UploadedItem, UploadedItems
 
 PLUGIN_FOLDER = Path(__file__).resolve().parent
 UPLOAD_STATS_FILE = PLUGIN_FOLDER / "stats" / "uploads.json"
@@ -14,11 +16,11 @@ class Plugin(BasePlugin):
         self.log(f"I was loaded in {__file__}")
         self.log(f"{PLUGIN_FOLDER = }")
         try:
-            self.items = UploadedItems.from_path(UPLOAD_STATS_FILE)
+            self.uitems = UploadedItems.from_path(UPLOAD_STATS_FILE)
             self.log("Found existing stats file!")
         except FileNotFoundError:
             self.log("Stats file not found! Creating anew...")
-            self.items = UploadedItems(UPLOAD_STATS_FILE)
+            self.uitems = UploadedItems(UPLOAD_STATS_FILE)
         finally:
             self.log("Loaded stats file!")
 
@@ -32,8 +34,16 @@ class Plugin(BasePlugin):
         # add a cached property, ensuring that it only gets called once.
         if once and self.__unload_is_called__:
             return
-        self.items.to_path()
+        self.uitems.to_path()
+        self.__unload_is_called__ = True
         self.log("Dumped stats file!")
 
     unloaded_notification = unload
     shutdown_notification = unload
+
+    def upload_finished_notification(self, user: str, virtual_path: str, real_path: str):
+        if virtual_path not in self.uitems:
+            self.uitems[virtual_path] = UploadedItem()
+        if user not in self.uitems[virtual_path]:
+            self.uitems[virtual_path][user] = 0
+        self.uitems[virtual_path][user] += 1

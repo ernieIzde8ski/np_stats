@@ -11,7 +11,7 @@ class UploadedItem(dict[str, int]):
 
 
 class UploadedItems(dict[str, UploadedItem]):
-    """Statistics on all uploads. A mapping of upload name to UploadedItem."""
+    """Statistics on all uploads. A mapping of upload virtual path to UploadedItem."""
 
     def sums(self) -> dict[str, int]:
         return {k: v.sum() for k, v in self.items()}
