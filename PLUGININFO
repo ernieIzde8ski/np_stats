@@ -1,0 +1,4 @@
+Version = "2022-10-07r00"
+Authors = ["Ernest Izdebski"]
+Name = "Upload Stats"
+Description = "Rudimentary upload statistic collecting."
